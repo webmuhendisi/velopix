@@ -1,6 +1,7 @@
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { OptimizedImage } from "@/components/ui/optimized-image";
 import { Product } from "@/lib/data";
 import { ShoppingCart } from "lucide-react";
 import { Link } from "wouter";
@@ -47,11 +48,11 @@ export default function ProductCard({ product }: ProductCardProps) {
               YENİ
             </Badge>
           )}
-          <img 
-            src={product.image} 
+          <OptimizedImage
+            src={product.image || ""}
             alt={`${product.title} - ${product.category || "Ürün"}`}
             className="w-full h-full object-cover rounded-md group-hover:scale-105 transition-transform duration-500"
-            loading="lazy"
+            priority={false}
           />
         </div>
         <CardContent className="p-3 flex-1 flex flex-col gap-1">

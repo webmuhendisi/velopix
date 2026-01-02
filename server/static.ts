@@ -37,7 +37,37 @@ export function serveStatic(app: Express) {
     );
   }
 
-  app.use(express.static(distPath));
+  // Static files with cache headers
+  app.use(express.static(distPath, {
+    maxAge: "1y", // Cache static assets for 1 year
+    etag: true,
+    lastModified: true,
+    setHeaders: (res, filePath) => {
+      // Set different cache times for different file types
+      const ext = path.extname(filePath).toLowerCase();
+      
+      // HTML files - short cache (for updates)
+      if (ext === ".html") {
+        res.setHeader("Cache-Control", "public, max-age=0, must-revalidate");
+      }
+      // CSS and JS files - long cache (with hash in filename)
+      else if (ext === ".css" || ext === ".js") {
+        res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+      }
+      // Images - long cache
+      else if ([".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg", ".ico"].includes(ext)) {
+        res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+      }
+      // Fonts - long cache
+      else if ([".woff", ".woff2", ".ttf", ".eot", ".otf"].includes(ext)) {
+        res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+      }
+      // Other files - default cache
+      else {
+        res.setHeader("Cache-Control", "public, max-age=86400");
+      }
+    },
+  }));
 
   // Handle product routes with dynamic SEO
   app.get("/product/:idOrSlug", async (req: Request, res: Response) => {

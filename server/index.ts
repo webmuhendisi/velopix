@@ -2,6 +2,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import cors from "cors";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
+import compression from "compression";
 import pino from "pino";
 import path from "path";
 import { env } from "./config";
@@ -24,6 +25,19 @@ const logger = pino({
 
 const app = express();
 const httpServer = createServer(app);
+
+// Compression middleware - gzip/brotli compression for better performance
+app.use(compression({
+  level: 6, // Compression level (1-9, 6 is a good balance)
+  filter: (req, res) => {
+    // Don't compress if client doesn't support it
+    if (req.headers["x-no-compression"]) {
+      return false;
+    }
+    // Use compression for all text-based content
+    return compression.filter(req, res);
+  },
+}));
 
 // Helmet.js for security headers
 app.use(helmet({
@@ -134,9 +148,16 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  // Uploads klasörünü serve et (registerRoutes'tan önce)
+  // Uploads klasörünü serve et (registerRoutes'tan önce) with cache headers
   const uploadsPath = path.join(process.cwd(), "client", "public", "uploads");
-  app.use("/uploads", express.static(uploadsPath));
+  app.use("/uploads", express.static(uploadsPath, {
+    maxAge: "1y",
+    etag: true,
+    lastModified: true,
+    setHeaders: (res) => {
+      res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+    },
+  }));
   
   await registerRoutes(httpServer, app);
 

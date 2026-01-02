@@ -318,7 +318,9 @@ export default function ProductDetail() {
                 src={images[selectedImage] || product?.image || ""} 
                 alt={product?.title || "Ürün görseli"} 
                 className="w-full h-full object-contain cursor-zoom-in"
-                loading="lazy"
+                loading={selectedImage === 0 ? "eager" : "lazy"}
+                fetchPriority={selectedImage === 0 ? "high" : "auto"}
+                decoding="async"
                 onClick={() => {
                   setModalImageIndex(selectedImage);
                   setIsImageModalOpen(true);
@@ -344,6 +346,8 @@ export default function ProductDetail() {
                       src={img} 
                       alt={`${product?.title} ${idx + 1}`}
                       className="w-full h-full object-cover"
+                      loading="lazy"
+                      decoding="async"
                     />
                   </button>
                 ))}
