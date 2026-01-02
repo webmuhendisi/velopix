@@ -107,7 +107,12 @@ export async function registerRoutes(
       const inStock = req.query.inStock === "true" ? true : req.query.inStock === "false" ? false : undefined;
       const sortBy = req.query.sortBy as string | undefined; // price_asc, price_desc, date_desc, rating
       
-      let products = await storage.getProducts(categoryId);
+      console.log(`[API /api/products] Request params:`, { categoryId, search, minPrice, maxPrice, brand, inStock, sortBy });
+      
+      // Include subcategories by default when filtering by category
+      let products = await storage.getProducts(categoryId, true);
+      
+      console.log(`[API /api/products] Retrieved ${products.length} products`);
       
       // Apply filters
       if (search) {

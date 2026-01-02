@@ -1,4 +1,4 @@
-import { eq, desc, sql, isNull } from "drizzle-orm";
+import { eq, desc, sql, isNull, inArray } from "drizzle-orm";
 import { db } from "./db";
 import {
   type User,
@@ -87,7 +87,7 @@ export interface IStorage {
   deleteCategory(id: string): Promise<void>;
 
   // Products
-  getProducts(categoryId?: string): Promise<Product[]>;
+  getProducts(categoryId?: string, includeSubcategories?: boolean): Promise<Product[]>;
   getProductsPaginated(page: number, limit: number, categoryId?: string): Promise<{ products: Product[]; total: number; page: number; limit: number; totalPages: number }>;
   getProduct(id: string): Promise<Product | undefined>;
   getProductBySlug(slug: string): Promise<Product | undefined>;
@@ -391,7 +391,9 @@ export class MySQLStorage implements IStorage {
     if (parentId === null) {
       return await db.select().from(categories).where(isNull(categories.parentId)).orderBy(categories.order, categories.name);
     }
-    return await db.select().from(categories).where(eq(categories.parentId, parentId)).orderBy(categories.order, categories.name);
+    const result = await db.select().from(categories).where(eq(categories.parentId, parentId)).orderBy(categories.order, categories.name);
+    console.log(`[getCategoriesByParent] Parent ID: ${parentId}, Found ${result.length} categories`);
+    return result;
   }
 
   async getCategoryTotalProductCount(categoryId: string, productCounts: Map<string, number>): Promise<number> {
@@ -438,11 +440,69 @@ export class MySQLStorage implements IStorage {
   }
 
   // Products
-  async getProducts(categoryId?: string): Promise<Product[]> {
+  async getProducts(categoryId?: string, includeSubcategories: boolean = true): Promise<Product[]> {
     if (categoryId) {
-      return await db.select().from(products).where(eq(products.categoryId, categoryId)).orderBy(desc(products.createdAt));
+      // Get all category IDs including subcategories
+      const categoryIds = await this.getCategoryIdsIncludingChildren(categoryId, includeSubcategories);
+      
+      console.log(`[getProducts] Category ID: ${categoryId}, Include Subcategories: ${includeSubcategories}`);
+      console.log(`[getProducts] Found ${categoryIds.length} category IDs:`, categoryIds);
+      
+      if (categoryIds.length === 0) {
+        console.log(`[getProducts] No category IDs found, returning empty array`);
+        return [];
+      }
+      
+      // Always use IN clause for consistency, even for single category
+      // This ensures we get products from the category and all its subcategories
+      try {
+        const result = await db.select().from(products).where(inArray(products.categoryId, categoryIds)).orderBy(desc(products.createdAt));
+        console.log(`[getProducts] Query with ${categoryIds.length} category IDs returned ${result.length} products`);
+        console.log(`[getProducts] Category IDs used:`, categoryIds);
+        
+        // Debug: Check if products exist for these categories
+        if (result.length === 0 && categoryIds.length > 1) {
+          console.log(`[getProducts] WARNING: No products found for ${categoryIds.length} categories. Checking individual categories...`);
+          for (const catId of categoryIds) {
+            const singleResult = await db.select().from(products).where(eq(products.categoryId, catId)).limit(1);
+            console.log(`[getProducts] Category ${catId} has ${singleResult.length} products`);
+          }
+        }
+        
+        return result;
+      } catch (error: any) {
+        console.error(`[getProducts] Error executing query:`, error);
+        console.error(`[getProducts] Category IDs:`, categoryIds);
+        throw error;
+      }
     }
     return await db.select().from(products).orderBy(desc(products.createdAt));
+  }
+
+  // Helper method to get category ID and all its children IDs
+  private async getCategoryIdsIncludingChildren(categoryId: string, includeSubcategories: boolean): Promise<string[]> {
+    const categoryIds: string[] = [categoryId];
+    
+    if (!includeSubcategories) {
+      return categoryIds;
+    }
+    
+    // Recursively get all child category IDs
+    const getChildIds = async (parentId: string): Promise<void> => {
+      const children = await this.getCategoriesByParent(parentId);
+      console.log(`[getCategoryIdsIncludingChildren] Parent ID: ${parentId}, Found ${children.length} children:`, children.map(c => ({ id: c.id, name: c.name, slug: c.slug })));
+      
+      for (const child of children) {
+        if (!categoryIds.includes(child.id)) {
+          categoryIds.push(child.id);
+          await getChildIds(child.id); // Recursively get grandchildren
+        }
+      }
+    };
+    
+    await getChildIds(categoryId);
+    console.log(`[getCategoryIdsIncludingChildren] Total category IDs collected: ${categoryIds.length}`, categoryIds);
+    return categoryIds;
   }
 
   async getProductsPaginated(page: number, limit: number, categoryId?: string): Promise<{ products: Product[]; total: number; page: number; limit: number; totalPages: number }> {

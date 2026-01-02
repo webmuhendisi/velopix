@@ -1,7 +1,8 @@
 import { ReactNode, useState, useEffect } from "react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import Header from "./Header";
 import MobileNav from "./MobileNav";
+import CategorySidebar from "./CategorySidebar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -78,6 +79,9 @@ interface LayoutProps {
 }
 
 export default function Layout({ children }: LayoutProps) {
+  const [location] = useLocation();
+  const isHomePage = location === "/";
+  
   const [footerData, setFooterData] = useState({
     description: "En yeni teknoloji ürünleri, gaming bilgisayarlar ve profesyonel teknik servis hizmetleri.",
     newsletterTitle: "E-Bülten",
@@ -104,7 +108,8 @@ export default function Layout({ children }: LayoutProps) {
   return (
     <div className="min-h-screen bg-white flex flex-col font-sans selection:bg-primary/20">
       <Header />
-      <main className="flex-1 w-full max-w-[100vw] overflow-x-hidden pb-20 md:pb-0">
+      {isHomePage && <CategorySidebar />}
+      <main className={`flex-1 w-full max-w-[100vw] overflow-x-hidden pb-20 md:pb-0 ${isHomePage ? 'lg:pl-16' : ''}`}>
         {children}
       </main>
       <MobileNav />

@@ -82,6 +82,7 @@ export default function Products() {
           };
           const category = findCategory(categoriesData);
           if (category) {
+            console.log(`[Products] Found category by slug "${categorySlug}":`, { id: category.id, name: category.name, slug: category.slug, children: category.children?.length || 0 });
             setSelectedCategory(category.id);
             // Expand parent categories
             const expandParents = (cat: Category, cats: Category[]): void => {
@@ -92,6 +93,8 @@ export default function Products() {
               }
             };
             expandParents(category, categoriesData);
+          } else {
+            console.warn(`[Products] Category with slug "${categorySlug}" not found`);
           }
         }
       } catch (error) {

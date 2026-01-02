@@ -228,8 +228,8 @@ export default function Home() {
 
   return (
     <Layout>
-      {/* Hero Slider - Taller E-commerce style */}
-      <section className="relative w-full overflow-hidden">
+      {/* Hero Slider - Hepsiburada Style */}
+      <section className="relative w-full overflow-hidden bg-white">
         <Carousel
           plugins={[plugin.current]}
           className="w-full"
@@ -241,15 +241,15 @@ export default function Home() {
           <CarouselContent className="m-0">
             {slides.map((slide) => (
               <CarouselItem key={slide.id} className="p-0">
-                <div className="relative w-full aspect-[16/7] md:aspect-[3.5/1] overflow-hidden">
+                <div className="relative w-full aspect-[16/6] md:aspect-[21/6] overflow-hidden">
                   <img
                     src={slide.image}
                     alt={`${slide.title} - ${slide.subtitle || "Slider görseli"}`}
-                    loading="lazy"
+                    loading="eager"
                     className="w-full h-full object-cover"
                   />
-                  {/* Gradient overlay - subtle */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-transparent to-transparent" />
+                  {/* Gradient overlay - minimal */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-black/30 via-transparent to-transparent" />
                   
                   {/* Content */}
                   <div className="absolute inset-0 flex items-center justify-start">
@@ -257,31 +257,31 @@ export default function Home() {
                       initial={{ opacity: 0, x: -40 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.2, duration: 0.6 }}
-                      className="container mx-auto px-4 md:px-8 max-w-2xl"
+                      className="container mx-auto px-6 md:px-12 max-w-2xl"
                     >
                       <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.4 }}
                       >
-                        <h2 className="text-4xl md:text-6xl font-bold font-heading text-white mb-3 drop-shadow-2xl">
+                        <h2 className="text-3xl md:text-5xl font-bold text-white mb-3 drop-shadow-lg">
                           {slide.title}
                         </h2>
                         {slide.subtitle && (
-                          <p className="text-white/95 text-base md:text-xl mb-6 drop-shadow-lg max-w-xl">
+                          <p className="text-white/90 text-sm md:text-lg mb-6 drop-shadow-md max-w-xl">
                             {slide.subtitle}
                           </p>
                         )}
                         {slide.link ? (
                           <Link href={slide.link}>
-                            <Button size="lg" className="bg-primary hover:bg-primary/90 text-white rounded-full px-8 font-bold shadow-xl text-base">
-                              Hemen Al
+                            <Button size="lg" className="bg-primary hover:bg-primary/90 text-white rounded-lg px-8 py-6 font-bold shadow-lg text-base">
+                              Hemen Keşfet
                             </Button>
                           </Link>
                         ) : (
                           <Link href="/products">
-                            <Button size="lg" className="bg-primary hover:bg-primary/90 text-white rounded-full px-8 font-bold shadow-xl text-base">
-                              Hemen Al
+                            <Button size="lg" className="bg-primary hover:bg-primary/90 text-white rounded-lg px-8 py-6 font-bold shadow-lg text-base">
+                              Hemen Keşfet
                             </Button>
                           </Link>
                         )}
@@ -295,34 +295,35 @@ export default function Home() {
         </Carousel>
       </section>
 
-      {/* Categories - Single Row */}
-      <section className="py-12 container mx-auto px-4">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold font-heading flex items-center gap-2">
-            <Sparkles className="w-6 h-6 text-primary" />
-            Kategoriler
-          </h2>
-        </div>
-        
-        <div className="overflow-x-auto no-scrollbar">
-          <div className="grid grid-cols-8 gap-4 min-w-max md:min-w-full md:grid-cols-8">
+      {/* Categories - Hepsiburada Style */}
+      <section className="py-8 bg-white border-b border-gray-100">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold text-gray-900">Kategoriler</h2>
+            <Link href="/categories" className="text-sm text-primary hover:underline font-semibold">
+              Tümünü Gör
+            </Link>
+          </div>
+          
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4">
             {categories.map((cat) => {
               const IconComponent = getIconComponent(cat.icon) || Package;
               return (
                 <Link key={cat.id} href={`/products?category=${cat.slug}`}>
                   <motion.div 
+                    whileHover={{ y: -4 }}
                     whileTap={{ scale: 0.95 }}
-                    className="flex flex-col items-center gap-3 cursor-pointer group flex-shrink-0"
+                    className="flex flex-col items-center gap-3 cursor-pointer group p-4 rounded-xl hover:bg-gray-50 transition-all border border-transparent hover:border-gray-200"
                   >
-                    <div className="w-14 h-14 md:w-20 md:h-20 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 group-hover:from-primary/20 group-hover:to-primary/10 flex items-center justify-center transition-all border-2 border-primary/10 group-hover:border-primary/30 group-hover:shadow-lg">
-                      <IconComponent className="w-6 h-6 md:w-8 md:h-8 text-primary" />
+                    <div className="w-16 h-16 md:w-20 md:h-20 rounded-xl bg-gradient-to-br from-primary/10 via-primary/5 to-white group-hover:from-primary/20 group-hover:via-primary/10 group-hover:to-primary/5 flex items-center justify-center transition-all shadow-sm group-hover:shadow-md">
+                      <IconComponent className="w-8 h-8 md:w-10 md:h-10 text-primary" />
                     </div>
-                    <div className="flex flex-col items-center">
-                      <span className="text-[10px] md:text-xs font-semibold text-center text-foreground group-hover:text-primary transition-colors">
+                    <div className="flex flex-col items-center text-center">
+                      <span className="text-xs md:text-sm font-semibold text-gray-900 group-hover:text-primary transition-colors line-clamp-2">
                         {cat.name}
                       </span>
                       {cat.productCount !== undefined && (
-                        <span className="text-[9px] text-muted-foreground mt-0.5">
+                        <span className="text-[10px] text-gray-500 mt-1">
                           {cat.productCount} ürün
                         </span>
                       )}
@@ -385,17 +386,17 @@ export default function Home() {
       </section>
 
       {/* Weekly Specials - Countdown */}
-      <section className="py-12 bg-gradient-to-r from-primary/10 to-transparent">
+      <section className="py-8 bg-white">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
-            <h2 className="text-2xl font-bold font-heading flex items-center gap-2">
-              <TrendingUp className="w-6 h-6 text-primary" />
+            <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-primary" />
               {campaignTitle}
             </h2>
             {campaignEndDate && <CountdownTimer targetDate={campaignEndDate} />}
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {weeklyProducts.map((product) => (
               <motion.div
                 key={product.id}
@@ -430,19 +431,19 @@ export default function Home() {
       </section>
 
       {/* Featured Products Section */}
-      <section className="py-12 bg-gradient-to-b from-secondary/20 to-background">
+      <section className="py-8 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold font-heading flex items-center gap-2">
-              <Zap className="w-6 h-6 text-primary fill-primary" />
+            <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+              <Zap className="w-5 h-5 text-primary fill-primary" />
               Fırsat Ürünleri
             </h2>
-            <Link href="/products" className="text-xs font-semibold text-primary flex items-center hover:gap-2 transition-all">
+            <Link href="/products" className="text-sm font-semibold text-primary flex items-center hover:gap-2 transition-all">
               Tümünü Gör <ChevronRight className="w-4 h-4 ml-1" />
             </Link>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {featuredProducts.map((product) => (
               <ProductCard key={product.id} product={{
                 id: product.id,
@@ -461,19 +462,19 @@ export default function Home() {
       </section>
 
       {/* Second-hand Products Section */}
-      <section className="py-12">
+      <section className="py-8 bg-white">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold font-heading flex items-center gap-2">
-              <RotateCcw className="w-6 h-6 text-primary" />
+            <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+              <RotateCcw className="w-5 h-5 text-primary" />
               2. El Ürünler
             </h2>
-            <Link href="/products" className="text-xs font-semibold text-primary flex items-center hover:gap-2 transition-all">
+            <Link href="/products" className="text-sm font-semibold text-primary flex items-center hover:gap-2 transition-all">
               Tümünü Gör <ChevronRight className="w-4 h-4 ml-1" />
             </Link>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {secondhandProducts.map((product) => (
               <ProductCard key={product.id} product={{
                 id: product.id,
@@ -564,15 +565,18 @@ export default function Home() {
       )}
 
       {/* More Products */}
-      <section className="py-12 pb-24 md:pb-12">
+      <section className="py-8 pb-24 md:pb-12 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold font-heading">
+            <h2 className="text-xl font-bold text-gray-900">
               Sizin İçin Seçtiklerimiz
             </h2>
+            <Link href="/products" className="text-sm font-semibold text-primary flex items-center hover:gap-2 transition-all">
+              Tümünü Gör <ChevronRight className="w-4 h-4 ml-1" />
+            </Link>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {moreProducts.map((product) => (
               <ProductCard key={product.id} product={{
                 id: product.id,

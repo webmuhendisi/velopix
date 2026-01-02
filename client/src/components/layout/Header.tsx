@@ -1,6 +1,6 @@
 import logo from "@assets/Gemini_Generated_Image_kdwvmkdwvmkdwvmk_1766829016231.png";
-import { Link } from "wouter";
-import { Search, ShoppingCart, User, Phone, Wrench, LogOut, Heart } from "lucide-react";
+import { Link, useLocation } from "wouter";
+import { Search, ShoppingCart, User, Phone, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState, useEffect } from "react";
@@ -9,8 +9,10 @@ import { useCart } from "@/contexts/CartContext";
 export default function Header() {
   const [isLoggedIn] = useState(false);
   const [wishlistCount, setWishlistCount] = useState(0);
+  const [searchQuery, setSearchQuery] = useState("");
   const { getItemCount } = useCart();
   const cartItemCount = getItemCount();
+  const [location, setLocation] = useLocation();
 
   useEffect(() => {
     const updateWishlistCount = () => {
@@ -22,99 +24,109 @@ export default function Header() {
     return () => clearInterval(interval);
   }, []);
 
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      setLocation(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
+
   return (
-    <header className="sticky top-0 z-40 w-full bg-white/95 backdrop-blur-md border-b border-border/30 shadow-sm">
-      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        {/* Mobile: Logo Left, Actions Right */}
-        <div className="flex items-center gap-2 md:hidden">
-           <Link href="/" className="flex items-center">
-              <img src={logo} alt="VeloPix" className="h-10 w-auto object-contain" />
-          </Link>
-        </div>
-
-        {/* Desktop: Logo + Nav */}
-        <div className="hidden md:flex items-center gap-12">
-          <Link href="/" className="flex items-center">
-              <img src={logo} alt="VeloPix" className="h-12 w-auto object-contain cursor-pointer hover:opacity-80 transition-opacity" />
-          </Link>
-          
-          <nav className="flex items-center gap-8">
-            <Link href="/" className="text-sm font-semibold text-foreground hover:text-primary transition-colors">Ana Sayfa</Link>
-            <Link href="/products" className="text-sm font-semibold text-foreground hover:text-primary transition-colors">Ürünler</Link>
-            <Link href="/repair" className="text-sm font-semibold text-red-600 hover:text-red-700 transition-colors flex items-center gap-1">
-              <Wrench className="w-4 h-4" />
-              Tamir
-            </Link>
-            <Link href="/blog" className="text-sm font-semibold text-foreground hover:text-primary transition-colors">Blog</Link>
-            <Link href="/about" className="text-sm font-semibold text-foreground hover:text-primary transition-colors">Hakkımızda</Link>
-            <Link href="/contact" className="text-sm font-semibold text-foreground hover:text-primary transition-colors">İletişim</Link>
-          </nav>
-        </div>
-
-        {/* Desktop: Search Bar */}
-        <div className="hidden md:flex items-center flex-1 max-w-md mx-8 relative">
-          <Input 
-            type="search" 
-            placeholder="Ürün ara..." 
-            className="w-full bg-secondary border-border/50 focus:border-primary/50 transition-all pl-10"
-          />
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
-        </div>
-
-        {/* Actions */}
-        <div className="flex items-center gap-2 md:gap-4">
-          <div className="md:hidden">
-             <Link href="/search">
-               <Button variant="ghost" size="icon" className="text-foreground hover:text-primary">
-                <Search className="w-5 h-5" />
-              </Button>
-             </Link>
+    <>
+      {/* Top Bar - Hepsiburada Style */}
+      <div className="bg-primary text-white text-xs py-2 hidden md:block">
+        <div className="container mx-auto px-4 flex items-center justify-between">
+          <div className="flex items-center gap-6">
+            <a href="tel:05338332111" className="flex items-center gap-1 hover:opacity-80 transition-opacity">
+              <Phone className="w-3 h-3" />
+              <span>0533 833 21 11</span>
+            </a>
+            <span className="text-white/80">|</span>
+            <span className="text-white/80">Hızlı Teslimat & Güvenli Ödeme</span>
           </div>
-
-          <a href="tel:05338332111" className="hidden md:flex items-center gap-2 text-sm font-semibold text-foreground hover:text-primary transition-colors">
-            <Phone className="w-4 h-4" />
-            <span>0533 833 21 11</span>
-          </a>
-
-          <div className="h-6 w-px bg-border hidden md:block" />
-
-          <Link href="/wishlist">
-            <Button variant="ghost" size="icon" className="relative text-foreground hover:text-primary transition-colors">
-              <Heart className="w-5 h-5" />
-              {wishlistCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-[10px] min-w-[16px] h-4 rounded-full flex items-center justify-center font-bold px-1">
-                  {wishlistCount > 99 ? "99+" : wishlistCount}
-                </span>
-              )}
-            </Button>
-          </Link>
-
-          <Link href="/cart">
-            <Button variant="ghost" size="icon" className="relative text-foreground hover:text-primary transition-colors">
-              <ShoppingCart className="w-5 h-5" />
-              {cartItemCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-[10px] min-w-[16px] h-4 rounded-full flex items-center justify-center font-bold px-1">
-                  {cartItemCount > 99 ? "99+" : cartItemCount}
-                </span>
-              )}
-            </Button>
-          </Link>
-
-          {isLoggedIn ? (
-            <Link href="/profile">
-              <Button variant="ghost" size="icon" className="hidden md:flex text-foreground hover:text-primary transition-colors">
-                <User className="w-5 h-5" />
-              </Button>
-            </Link>
-          ) : (
-            <Link href="/login">
-              <Button size="sm" className="hidden md:flex bg-primary hover:bg-primary/90 text-white rounded-full font-bold">
+          <div className="flex items-center gap-4">
+            {isLoggedIn ? (
+              <Link href="/profile" className="hover:opacity-80 transition-opacity flex items-center gap-1">
+                <User className="w-3 h-3" />
+                <span>Hesabım</span>
+              </Link>
+            ) : (
+              <Link href="/login" className="hover:opacity-80 transition-opacity">
                 Giriş Yap
-              </Button>
-            </Link>
-          )}
+              </Link>
+            )}
+          </div>
         </div>
       </div>
-    </header>
+
+      {/* Main Header */}
+      <header className="sticky top-0 z-50 w-full bg-white border-b border-gray-200 shadow-sm">
+        <div className="container mx-auto px-4">
+          {/* Main Header Row */}
+          <div className="h-20 flex items-center justify-between gap-4">
+            {/* Logo */}
+            <Link href="/" className="flex items-center flex-shrink-0">
+              <img src={logo} alt="VeloPix" className="h-12 w-auto object-contain cursor-pointer hover:opacity-80 transition-opacity" />
+            </Link>
+
+
+            {/* Search Bar - Desktop */}
+            <form onSubmit={handleSearch} className="hidden md:flex items-center flex-1 max-w-2xl mx-4 relative">
+              <Input 
+                type="search" 
+                placeholder="Ürün, kategori veya marka ara..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full h-12 bg-gray-50 border-2 border-gray-200 focus:border-primary rounded-lg pr-12 text-sm"
+              />
+              <Button 
+                type="submit"
+                size="icon"
+                className="absolute right-2 h-8 w-8 bg-primary hover:bg-primary/90 text-white rounded-md"
+              >
+                <Search className="w-4 h-4" />
+              </Button>
+            </form>
+
+            {/* Actions */}
+            <div className="flex items-center gap-2 md:gap-3">
+              {/* Mobile Search */}
+              <Link href="/search" className="md:hidden">
+                <Button variant="ghost" size="icon" className="text-gray-700 hover:text-primary">
+                  <Search className="w-5 h-5" />
+                </Button>
+              </Link>
+
+              {/* Wishlist */}
+              <Link href="/wishlist">
+                <Button variant="ghost" size="icon" className="relative text-gray-700 hover:text-primary hidden md:flex">
+                  <Heart className="w-5 h-5" />
+                  {wishlistCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-primary text-white text-[10px] min-w-[18px] h-[18px] rounded-full flex items-center justify-center font-bold">
+                      {wishlistCount > 99 ? "99+" : wishlistCount}
+                    </span>
+                  )}
+                </Button>
+              </Link>
+
+              {/* Cart */}
+              <Link href="/cart">
+                <Button variant="ghost" size="icon" className="relative text-gray-700 hover:text-primary">
+                  <ShoppingCart className="w-5 h-5" />
+                  {cartItemCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-primary text-white text-[10px] min-w-[18px] h-[18px] rounded-full flex items-center justify-center font-bold">
+                      {cartItemCount > 99 ? "99+" : cartItemCount}
+                    </span>
+                  )}
+                </Button>
+              </Link>
+
+            </div>
+          </div>
+
+        </div>
+      </header>
+    </>
   );
 }
